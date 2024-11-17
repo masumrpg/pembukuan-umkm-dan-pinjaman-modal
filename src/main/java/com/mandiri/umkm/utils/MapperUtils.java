@@ -32,22 +32,21 @@ public class MapperUtils {
     public static LoanApplicationResponse toLoanApplicationResponse(LoanApplication loanApplication) {
         return LoanApplicationResponse.builder()
                 .id(loanApplication.getId())
-                .user(toUserResponse(loanApplication.getUser()))
+                .userId(loanApplication.getUser().getId())
                 .loanAmount(loanApplication.getLoanAmount())
                 .durationMonths(loanApplication.getDurationMonths())
                 .interestRate(loanApplication.getInterestRate())
-                .applicationDate(loanApplication.getApplicationDate() != null ? loanApplication.getApplicationDate().toString() : null)
                 .approvalStatus(loanApplication.getApprovalStatus())
-                .approvedBy(toUserResponse(loanApplication.getApprovedBy()))
+                .approvedBy(loanApplication.getUser().getFullName())
                 .approvedAt(loanApplication.getApprovedAt() != null ? loanApplication.getApprovedAt().toString() : null)
                 .notes(loanApplication.getNotes())
                 .build();
     }
 
-    public static MonthlyReportResponse toMonthlyReportResponse(MonthlyReport monthlyReport, User user) {
+    public static MonthlyReportResponse toMonthlyReportResponse(MonthlyReport monthlyReport) {
         return MonthlyReportResponse.builder()
                 .id(monthlyReport.getId())
-                .user(toUserResponse(user))
+                .user(toUserResponse(monthlyReport.getUser()))
                 .month(monthlyReport.getMonth())
                 .year(monthlyReport.getYear())
                 .totalIncome(monthlyReport.getTotalIncome())
@@ -69,6 +68,7 @@ public class MapperUtils {
                 .amount(transaction.getAmount())
                 .paymentType(transaction.getPaymentType())
                 .transactionProof(transaction.getTransactionProof())
+                .transactionDate(transaction.getTransactionDate().toString())
                 .createdAt(transaction.getCreatedAt() != null ? transaction.getCreatedAt().toString() : null)
                 .updatedAt(transaction.getUpdatedAt() != null ? transaction.getUpdatedAt().toString() : null)
                 .status(transaction.getStatus())

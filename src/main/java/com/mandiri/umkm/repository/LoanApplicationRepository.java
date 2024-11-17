@@ -4,11 +4,11 @@ import com.mandiri.umkm.entity.LoanApplication;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
@@ -18,36 +18,29 @@ public interface LoanApplicationRepository extends JpaRepository<LoanApplication
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO loan_applications " +
-            "(id, user_id, loan_amount, duration_months, interest_rate, application_date, " +
-            "approval_status, approved_by, approved_at, notes) " +
+            "(id, user_id, loan_amount, duration_months, interest_rate, " +
+            "approval_status, created_at, approved_by, approved_at, notes) " +
             "VALUES (:#{#loan.id}, :#{#loan.user.id}, :#{#loan.loanAmount}, :#{#loan.durationMonths}, " +
-            ":#{#loan.interestRate}, :#{#loan.applicationDate}, " +
-            "CAST(:#{#loan.approvalStatus.name()} AS VARCHAR), :#{#loan.approvedBy?.id}, " +
+            ":#{#loan.interestRate}, " +
+            "CAST(:#{#loan.approvalStatus.name()} AS VARCHAR), :#{#loan.createdAt}, :#{#loan.approvedBy?.id}, " +
             ":#{#loan.approvedAt}, :#{#loan.notes})", nativeQuery = true)
-    void create(@Param("loan") LoanApplication loan);
+    void createNativeQuery(@Param("loan") LoanApplication loan);
 
-    // Read
-    @Query(value = "SELECT la.*, " +
-            "u.name as user_name, " +
-            "ab.name as approved_by_name " +
-            "FROM loan_applications la " +
-            "LEFT JOIN users u ON la.user_id = u.id " +
-            "LEFT JOIN users ab ON la.approved_by = ab.id " +
-            "ORDER BY la.application_date DESC",
+    @Query(value = """
+            SELECT *
+            FROM loan_applications la
+            """,
             countQuery = "SELECT count(*) FROM loan_applications",
             nativeQuery = true)
-    Page<LoanApplication> findAll(Pageable pageable);
+    Page<LoanApplication> findAllNativeQuery(Pageable pageable);
 
-    // Read
-    @Query(value = "SELECT la.*, " +
-            "u.name as user_name, " +
-            "ab.name as approved_by_name " +
-            "FROM loan_applications la " +
-            "LEFT JOIN users u ON la.user_id = u.id " +
-            "LEFT JOIN users ab ON la.approved_by = ab.id " +
-            "WHERE la.id = :id",
+    @Query(value = """
+            SELECT *
+            FROM loan_applications la
+            WHERE la.id = :id
+            """,
             nativeQuery = true)
-    Optional<LoanApplication> findById(@Param("id") String id);
+    Optional<LoanApplication> findByIdNativeQuery(@Param("id") String id);
 
     // Update
     @Modifying
@@ -67,33 +60,5 @@ public interface LoanApplicationRepository extends JpaRepository<LoanApplication
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM loan_applications WHERE id = :id", nativeQuery = true)
-    void deleteById(@Param("id") String id);
-
-    // Additional
-
-    // Find by Status
-    @Query(value = "SELECT la.*, " +
-            "u.name as user_name, " +
-            "ab.name as approved_by_name " +
-            "FROM loan_applications la " +
-            "LEFT JOIN users u ON la.user_id = u.id " +
-            "LEFT JOIN users ab ON la.approved_by = ab.id " +
-            "WHERE la.approval_status = CAST(:status AS VARCHAR) " +
-            "ORDER BY la.application_date DESC",
-            countQuery = "SELECT count(*) FROM loan_applications WHERE approval_status = CAST(:status AS VARCHAR)",
-            nativeQuery = true)
-    Page<LoanApplication> findByStatus(@Param("status") String status, Pageable pageable);
-
-    // Find by User Id
-    @Query(value = "SELECT la.*, " +
-            "u.name as user_name, " +
-            "ab.name as approved_by_name " +
-            "FROM loan_applications la " +
-            "LEFT JOIN users u ON la.user_id = u.id " +
-            "LEFT JOIN users ab ON la.approved_by = ab.id " +
-            "WHERE la.user_id = :userId " +
-            "ORDER BY la.application_date DESC",
-            countQuery = "SELECT count(*) FROM loan_applications WHERE user_id = :userId",
-            nativeQuery = true)
-    Page<LoanApplication> findByUserId(@Param("userId") String userId, Pageable pageable);
+    void deleteByIdNativeQuery(@Param("id") String id);
 }

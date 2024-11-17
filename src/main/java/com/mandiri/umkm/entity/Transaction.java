@@ -1,8 +1,8 @@
 package com.mandiri.umkm.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false, unique = true)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,7 +28,7 @@ public class Transaction {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 30)
     private String transactionNumber;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -65,13 +65,11 @@ public class Transaction {
         PENDING, COMPLETED, CANCELLED
     }
 
-    @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
     }
 
-    @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }

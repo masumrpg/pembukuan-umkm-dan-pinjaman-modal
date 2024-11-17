@@ -7,9 +7,14 @@ import org.springframework.data.domain.Page;
 
 public interface CategoryService {
     void create(CategoryRequest categoryRequest);
+
     CategoryResponse getById(String id);
+
     void update(String id, CategoryRequest categoryRequest);
+
     void delete(String id);
-    Page<Category> getAll(Integer page, Integer size);
+
+    Page<CategoryResponse> getAll(Integer page, Integer size);
+
     Category getOneById(String id);
 }

@@ -1,33 +1,53 @@
 package com.mandiri.umkm.controller;
 
-import com.mandiri.umkm.entity.MonthlyReport;
-import com.mandiri.umkm.service.impl.MonthlyReportServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mandiri.umkm.dto.request.MonthlyReportRequest;
+import com.mandiri.umkm.dto.request.MonthlyReportUpdateRequest;
+import com.mandiri.umkm.dto.response.MonthlyReportResponse;
+import com.mandiri.umkm.service.MonthlyReportService;
+import com.mandiri.umkm.utils.ResponseUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/reports")
+@RequiredArgsConstructor
 public class MonthlyReportController {
 
-    private final MonthlyReportServiceImpl monthlyReportServiceImpl;
-
-    @Autowired
-    public MonthlyReportController(MonthlyReportServiceImpl monthlyReportServiceImpl) {
-        this.monthlyReportServiceImpl = monthlyReportServiceImpl;
-    }
-
-    @GetMapping("/{userId}/{month}/{year}")
-    public ResponseEntity<?> getMonthlyReport(@PathVariable String userId, @PathVariable int month, @PathVariable int year) {
-        Optional<MonthlyReport> report = monthlyReportServiceImpl.getReportByUserIdAndMonthAndYear(userId, month, year);
-        return report.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    private final MonthlyReportService monthlyReportService;
 
     @PostMapping
-    public ResponseEntity<?> createMonthlyReport(@RequestBody MonthlyReport report) {
-        MonthlyReport createdReport = monthlyReportServiceImpl.saveMonthlyReport(report);
-        return ResponseEntity.ok(createdReport);
+    public ResponseEntity<?> createMonthlyReport(@RequestBody MonthlyReportRequest request) {
+        monthlyReportService.create(request);
+        return ResponseUtils.buildCommonResponse(HttpStatus.CREATED, "Report successfully created", null);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getMonthlyReportById(@PathVariable String id) {
+        MonthlyReportResponse monthlyReportResponse = monthlyReportService.getById(id);
+        return ResponseUtils.buildCommonResponse(HttpStatus.OK, "Report successfully retrieved", monthlyReportResponse);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateMonthlyReport(@PathVariable String id, @RequestBody MonthlyReportUpdateRequest request) {
+        monthlyReportService.update(id, request);
+        return ResponseUtils.buildCommonResponse(HttpStatus.OK, "Report successfully updated", null);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMonthlyReport(@PathVariable String id) {
+        monthlyReportService.delete(id);
+        return ResponseUtils.buildCommonResponse(HttpStatus.OK, "Report successfully deleted", null);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllMonthlyReports(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<MonthlyReportResponse> monthlyReportResponses = monthlyReportService.getAll((page - 1), size);
+        return ResponseUtils.buildResponsePage(HttpStatus.OK, "Report successfully retrieved", monthlyReportResponses);
     }
 }

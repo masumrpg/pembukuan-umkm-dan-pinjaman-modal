@@ -1,8 +1,8 @@
 package com.mandiri.umkm.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false, unique = true)
     private String id;
 
     @Column(nullable = false, length = 50)
@@ -38,13 +38,11 @@ public class Category {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
     }
 
-    @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }

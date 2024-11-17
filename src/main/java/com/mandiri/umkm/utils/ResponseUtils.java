@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public class ResponseUtil {
+public class ResponseUtils {
     public static <T> ResponseEntity<CommonResponse<T>> buildCommonResponse(HttpStatus httpStatus, String message, T data) {
         CommonResponse<T> commonResponse = new CommonResponse<>(httpStatus.value(), message, data);
         return ResponseEntity.status(httpStatus).body(commonResponse);

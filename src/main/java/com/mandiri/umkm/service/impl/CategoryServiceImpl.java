@@ -31,7 +31,8 @@ public class CategoryServiceImpl implements CategoryService {
                 .description(request.getDescription())
                 .type(request.getType())
                 .build();
-        categoryRepository.create(newCategory);
+        newCategory.onCreate();
+        categoryRepository.createNativeQuery(newCategory);
     }
 
     @Override
@@ -45,24 +46,24 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(categoryRequest.getName());
         category.setDescription(categoryRequest.getDescription());
         category.setType(categoryRequest.getType());
-        categoryRepository.update(category);
+        category.onUpdate();
+        categoryRepository.updateByIdNativeQuery(category);
     }
 
     @Override
     public void delete(String id) {
-        if (getOneById(id) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
-        }
-        categoryRepository.deleteById(id);
+        getOneById(id);
+        categoryRepository.deleteNativeQuery(id);
     }
 
     @Override
-    public Page<Category> getAll(Integer page, Integer size) {
-        return categoryRepository.findAll(PageRequest.of(page, size));
+    public Page<CategoryResponse> getAll(Integer page, Integer size) {
+        Page<Category> categoryPage = categoryRepository.findAllNativeQuery(PageRequest.of(page, size));
+        return categoryPage.map(MapperUtils::toCategoryResponse);
     }
 
     @Override
     public Category getOneById(String id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Category with id %s not found", id)));
+        return categoryRepository.findByIdNativeQuery(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Category with id %s not found", id)));
     }
 }

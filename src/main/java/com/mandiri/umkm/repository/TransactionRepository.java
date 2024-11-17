@@ -1,29 +1,72 @@
 package com.mandiri.umkm.repository;
 
+import com.mandiri.umkm.entity.Transaction;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.mandiri.umkm.entity.Transaction;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
+    // Create
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO transactions (id, user_id, category_id, transaction_number, description, amount, transaction_date, payment_type, transaction_proof, created_at, updated_at, status) " +
+            "VALUES (:#{#transaction.id}, :#{#transaction.user.id}, :#{#transaction.category.id}, :#{#transaction.transactionNumber}, :#{#transaction.description}, :#{#transaction.amount}, " +
+            ":#{#transaction.transactionDate}, CAST(:#{#transaction.paymentType.name()} AS VARCHAR), :#{#transaction.transactionProof}, :#{#transaction.createdAt}, :#{#transaction.updatedAt}, CAST(:#{#transaction.status.name()} AS VARCHAR))",
+            nativeQuery = true)
+    void createNativeQuery(@Param("transaction") Transaction transaction);
 
-    @Query(value = "SELECT * FROM transactions WHERE user_id = :userId", nativeQuery = true)
-    List<Transaction> findByUserId(@Param("userId") String userId);
+    // Get by id
+    @Query(value = "SELECT t.*, " +
+            "u.username AS user_name, " +
+            "c.name AS category_name " +
+            "FROM transactions t " +
+            "LEFT JOIN users u ON t.user_id = u.id " +
+            "LEFT JOIN categories c ON t.category_id = c.id " +
+            "WHERE t.id = :id",
+            nativeQuery = true)
+    Optional<Transaction> findByIdNativeQuery(@Param("id") String id);
 
-    @Query(value = "SELECT * FROM transactions WHERE category_id = :categoryId", nativeQuery = true)
-    List<Transaction> findByCategoryId(@Param("categoryId") String categoryId);
+    // Update
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE transactions SET " +
+            "user_id = :#{#transaction.user.id}, " +
+            "category_id = :#{#transaction.category.id}, " +
+            "transaction_number = :#{#transaction.transactionNumber}, " +
+            "description = :#{#transaction.description}, " +
+            "amount = :#{#transaction.amount}, " +
+            "transaction_date = :#{#transaction.transactionDate}, " +
+            "payment_type = CAST(:#{#transaction.paymentType.name()} AS VARCHAR), " +
+            "transaction_proof = :#{#transaction.transactionProof}, " +
+            "updated_at = :#{#transaction.updatedAt}, " +
+            "status = CAST(:#{#transaction.status.name()} AS VARCHAR) " +
+            "WHERE id = :#{#transaction.id}",
+            nativeQuery = true)
+    void updateNative(@Param("transaction") Transaction transaction);
 
-    @Query(value = "SELECT * FROM transactions WHERE transaction_date BETWEEN :startDate AND :endDate", nativeQuery = true)
-    List<Transaction> findByTransactionDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    // Delete
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM transactions WHERE id = :id", nativeQuery = true)
+    void deleteByIdNativeQuery(@Param("id") String id);
 
-    @Query(value = "SELECT SUM(amount) FROM transactions WHERE user_id = :userId AND transaction_date BETWEEN :startDate AND :endDate AND category_id IN (SELECT id FROM categories WHERE type = 'INCOME')", nativeQuery = true)
-    Double calculateTotalIncome(@Param("userId") String userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-
-    @Query(value = "SELECT SUM(amount) FROM transactions WHERE user_id = :userId AND transaction_date BETWEEN :startDate AND :endDate AND category_id IN (SELECT id FROM categories WHERE type = 'EXPENSE')", nativeQuery = true)
-    Double calculateTotalExpense(@Param("userId") String userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    // Get all
+    @Query(value = "SELECT t.*, " +
+            "u.username AS user_name, " +
+            "c.name AS category_name " +
+            "FROM transactions t " +
+            "LEFT JOIN users u ON t.user_id = u.id " +
+            "LEFT JOIN categories c ON t.category_id = c.id " +
+            "ORDER BY t.transaction_date DESC",
+            countQuery = "SELECT count(*) FROM transactions",
+            nativeQuery = true)
+    Page<Transaction> findAllNativeQuery(Pageable pageable);
 }

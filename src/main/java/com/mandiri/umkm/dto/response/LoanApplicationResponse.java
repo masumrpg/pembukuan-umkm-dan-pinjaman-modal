@@ -12,13 +12,12 @@ import java.math.BigDecimal;
 @Builder
 public class LoanApplicationResponse {
     private String id;
-    private UserResponse user;
+    private String userId;
     private BigDecimal loanAmount;
     private int durationMonths;
     private BigDecimal interestRate;
-    private String applicationDate;
     private LoanApplication.ApprovalStatus approvalStatus;
-    private UserResponse approvedBy;
+    private String approvedBy;
     private String approvedAt;
     private String notes;
 }

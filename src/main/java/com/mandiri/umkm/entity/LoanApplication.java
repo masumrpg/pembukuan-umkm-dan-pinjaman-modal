@@ -1,8 +1,8 @@
 package com.mandiri.umkm.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -16,40 +16,40 @@ import java.time.LocalDateTime;
 public class LoanApplication {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false, unique = true)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "loan_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal loanAmount;
 
-    @Column(nullable = false)
+    @Column(name = "duration_months", nullable = false)
     private int durationMonths;
 
-    @Column(nullable = false, precision = 5, scale = 2)
+    @Column(name = "interest_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal interestRate;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime applicationDate;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "approval_status", nullable = false)
     private ApprovalStatus approvalStatus;
-
-    public enum ApprovalStatus {
-        PENDING, APPROVED, REJECTED
-    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by")
     private User approvedBy;
 
-    @Column
+    @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    public enum ApprovalStatus {
+        PENDING, APPROVED, REJECTED
+    }
 }

@@ -1,8 +1,8 @@
 package com.mandiri.umkm.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class MonthlyReport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false, unique = true)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,13 +52,11 @@ public class MonthlyReport {
         DRAFT, FINAL
     }
 
-    @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
     }
 
-    @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
