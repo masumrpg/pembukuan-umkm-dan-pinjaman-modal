@@ -259,6 +259,20 @@ mudah—semua dalam satu platform yang terintegrasi.
 
 ---
 
+## Menjalankan Aplikasi
+
+Build aplikasi dengan perintah berikut:
+
+```shell
+1. Build java app:
+./mvnw clean package
+
+2. Build dan jalankan aplikasi java dan postgresql
+docker-compose up --build
+```
+
+---
+
 ## Kontributor
 
 - **Ma'sum** - Calon Developer di,

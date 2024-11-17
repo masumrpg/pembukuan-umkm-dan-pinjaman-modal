@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Database Service (PostgreSQL)
+  db:
+    image: postgres:latest
+    container_name: umkm-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: umkm
+    ports:
+      - "5432:5432"
+    networks:
+      - umkm-network
+
+  # Spring Boot Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: umkm-app
+    environment:
+      SPRING_APPLICATION_NAME: Pembukuan UMKM
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/umkm
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_GENERATE_DDL: "true"
+      SPRING_JPA_SHOW_SQL: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - umkm-network
+
+networks:
+  umkm-network:
+    driver: bridge
